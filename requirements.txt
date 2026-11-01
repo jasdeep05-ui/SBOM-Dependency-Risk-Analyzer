@@ -10,3 +10,4 @@ Werkzeug==3.0.3
 pytest==8.2.2
 pytest-mock==3.14.0
 responses==0.25.3
+gunicorn
