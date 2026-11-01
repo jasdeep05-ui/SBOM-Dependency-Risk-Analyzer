@@ -1,0 +1,48 @@
+# -----------------------------------------------------------------------
+# Sample requirements.txt for SBOM Dependency Risk Analyzer tests
+# Contains: exact pins, ranges, unpinned, extras, markers, editable,
+#           VCS deps, URL deps, and comments.
+# -----------------------------------------------------------------------
+
+# Core framework (exact pin)
+Flask==3.0.3
+
+# Database (exact pin)
+SQLAlchemy==2.0.28
+
+# Pinned with pre-release
+Werkzeug==3.0.3
+
+# Range constraints
+requests>=2.28.0,<3.0.0
+urllib3>=1.26.0
+
+# Compatible release (range)
+numpy~=1.24.0
+
+# Unpinned (no version)
+six
+
+# With extras (exact pin)
+requests[security]==2.31.0
+
+# With environment marker (exact pin, marker stripped)
+pywin32==306; sys_platform == "win32"
+
+# Dev / optional (range)
+pytest>=7.0
+
+# VCS dependency (should be skipped_vcs)
+git+https://github.com/psf/requests.git#egg=requests-dev
+
+# URL dependency (should be skipped_url)
+https://example.com/packages/mypackage-1.0.tar.gz
+
+# Editable install (should be skipped_editable)
+-e .
+
+# Option line (should be ignored silently)
+-r other-requirements.txt
+
+# Another comment
+# End of file

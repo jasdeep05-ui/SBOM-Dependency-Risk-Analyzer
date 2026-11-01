@@ -1,0 +1,17 @@
+# Malformed requirements.txt for parser robustness tests.
+# Valid lines should be parsed; invalid ones skipped with a warning.
+
+# Valid exact pin (should parse)
+flask==2.3.2
+
+# Valid range (should parse)
+requests>=2.0
+
+# Line with only operators — malformed, should be skipped
+===
+
+# Valid unpinned (should parse)
+six
+
+# Another valid exact pin
+Werkzeug==2.3.7

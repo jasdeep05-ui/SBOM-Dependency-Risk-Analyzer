@@ -1,0 +1,24 @@
+{
+  "name": "sample-project",
+  "version": "1.0.0",
+  "dependencies": {
+    "express": "4.18.2",
+    "lodash": "^4.17.21",
+    "axios": "~1.6.0",
+    "react": ">=18.0.0 <19.0.0",
+    "uuid": "*",
+    "@babel/core": "7.23.9",
+    "@scope/utils": "^2.1.0",
+    "legacy-pkg": "latest",
+    "vcs-dep": "git+https://github.com/example/pkg.git",
+    "file-dep": "file:../local-package",
+    "workspace-dep": "workspace:*",
+    "url-dep": "https://example.com/pkg.tgz"
+  },
+  "devDependencies": {
+    "jest": "29.7.0",
+    "eslint": "^8.55.0",
+    "typescript": "5.3.3",
+    "unpinned-dev": ""
+  }
+}
