@@ -1,0 +1,71 @@
+Package,Version,Ecosystem,Vuln ID,Severity,CVSS Score,CVSS Vector,Fixed Version,Recommendation,Scan Status
+requests,2.31.0,PyPI,GHSA-652x-xj99-gmcc,Medium,6.9,CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:L/VI:N/VA:N/SC:N/SI:N/SA:N,2.3.0,Upgrade to version 2.3.0 or later.,scanned
+requests,2.31.0,PyPI,GHSA-9hjg-9r4m-mvj7,Medium,5.3,CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:N/A:N,2.32.4,Upgrade to version 2.32.4 or later.,scanned
+requests,2.31.0,PyPI,GHSA-9wx4-h78v-vm56,Medium,5.6,CVSS:3.1/AV:L/AC:H/PR:H/UI:R/S:U/C:H/I:H/A:N,2.32.0,Upgrade to version 2.32.0 or later.,scanned
+requests,2.31.0,PyPI,GHSA-cfj3-7x9c-4p3h,Medium,6.9,CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:L/VI:N/VA:N/SC:N/SI:N/SA:N,2.3.0,Upgrade to version 2.3.0 or later.,scanned
+requests,2.31.0,PyPI,GHSA-gc5v-m9x4-r6x2,Medium,4.4,CVSS:3.1/AV:L/AC:H/PR:L/UI:R/S:U/C:N/I:H/A:N,2.33.0,Upgrade to version 2.33.0 or later.,scanned
+requests,2.31.0,PyPI,GHSA-j8r2-6x86-q33q,Medium,6.1,CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:C/C:H/I:N/A:N,2.31.0,Upgrade to version 2.31.0 or later.,scanned
+requests,2.31.0,PyPI,GHSA-pg2w-x9wp-vw92,Medium,—,—,2.6.0,Upgrade to version 2.6.0 or later.,scanned
+requests,2.31.0,PyPI,GHSA-x84v-xcm2-53pg,High,7.5,CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N,2.20.0,Upgrade as soon as possible to version 2.20.0 or later.,scanned
+requests,2.31.0,PyPI,PYSEC-2014-13,Unknown,—,—,2.3.0,Upgrade to version 2.3.0 or later.,scanned
+requests,2.31.0,PyPI,PYSEC-2014-14,Unknown,—,—,2.3.0,Upgrade to version 2.3.0 or later.,scanned
+requests,2.31.0,PyPI,PYSEC-2015-17,Unknown,—,—,2.6.0,Upgrade to version 2.6.0 or later.,scanned
+requests,2.31.0,PyPI,PYSEC-2018-28,Unknown,—,—,2.20.0,Upgrade to version 2.20.0 or later.,scanned
+requests,2.31.0,PyPI,PYSEC-2023-74,Unknown,—,—,2.31.0,Upgrade to version 2.31.0 or later.,scanned
+requests,2.31.0,PyPI,PYSEC-2026-1872,Medium,5.3,CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:N/A:N,2.32.4,Upgrade to version 2.32.4 or later.,scanned
+requests,2.31.0,PyPI,PYSEC-2026-1873,Medium,5.6,CVSS:3.1/AV:L/AC:H/PR:H/UI:R/S:U/C:H/I:H/A:N,2.32.0,Upgrade to version 2.32.0 or later.,scanned
+requests,2.31.0,PyPI,PYSEC-2026-2275,Medium,5.5,CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:H/A:N,2.33.0,Upgrade to version 2.33.0 or later.,scanned
+flask,3.0.0,PyPI,GHSA-4grg-w6v8-c28g,Low,1.8,CVSS:4.0/AV:L/AC:L/AT:P/PR:H/UI:N/VC:N/VI:N/VA:L/SC:N/SI:N/SA:N,3.1.1,Upgrade to version 3.1.1 or later.,scanned
+flask,3.0.0,PyPI,GHSA-562c-5r94-xh97,High,8.7,CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:H/SC:N/SI:N/SA:N,0.12.3,Upgrade as soon as possible to version 0.12.3 or later.,scanned
+flask,3.0.0,PyPI,GHSA-5wv5-4vpf-pj6m,High,8.7,CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:H/SC:N/SI:N/SA:N,1.0,Upgrade as soon as possible to version 1.0 or later.,scanned
+flask,3.0.0,PyPI,GHSA-68rp-wp8r-4726,Low,2.3,CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:P/VC:L/VI:N/VA:N/SC:N/SI:N/SA:N,3.1.3,Upgrade to version 3.1.3 or later.,scanned
+flask,3.0.0,PyPI,GHSA-m2qf-hxjv-5gpq,High,8.7,CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:N/VA:N/SC:N/SI:N/SA:N,2.3.2,Upgrade as soon as possible to version 2.3.2 or later.,scanned
+flask,3.0.0,PyPI,PYSEC-2018-66,Unknown,—,—,0.12.3,Upgrade to version 0.12.3 or later.,scanned
+flask,3.0.0,PyPI,PYSEC-2019-179,Unknown,—,—,1.0,Upgrade to version 1.0 or later.,scanned
+flask,3.0.0,PyPI,PYSEC-2023-62,Unknown,—,—,2.2.5,Upgrade to version 2.2.5 or later.,scanned
+flask,3.0.0,PyPI,PYSEC-2026-1377,Low,1.8,CVSS:4.0/AV:L/AC:L/AT:P/PR:H/UI:N/VC:N/VI:N/VA:L/SC:N/SI:N/SA:N,3.1.1,Upgrade to version 3.1.1 or later.,scanned
+flask,3.0.0,PyPI,PYSEC-2026-2151,Medium,4.3,CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:L/I:N/A:N,3.1.3,Upgrade to version 3.1.3 or later.,scanned
+urllib3,2.0.7,PyPI,GHSA-2xpw-w6gg-jr37,High,8.9,CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:N/VI:N/VA:H/SC:N/SI:N/SA:H,2.6.0,Upgrade as soon as possible to version 2.6.0 or later.,scanned
+urllib3,2.0.7,PyPI,GHSA-34jh-p97f-mpxf,Medium,4.4,CVSS:3.1/AV:N/AC:H/PR:H/UI:N/S:U/C:H/I:N/A:N,1.26.19,Upgrade to version 1.26.19 or later.,scanned
+urllib3,2.0.7,PyPI,GHSA-38jv-5279-wg99,High,8.9,CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:N/VI:N/VA:H/SC:N/SI:N/SA:H,2.6.3,Upgrade as soon as possible to version 2.6.3 or later.,scanned
+urllib3,2.0.7,PyPI,GHSA-48p4-8xcf-vxj5,Medium,5.3,CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:U/C:H/I:N/A:N,2.5.0,Upgrade to version 2.5.0 or later.,scanned
+urllib3,2.0.7,PyPI,GHSA-5phf-pp7p-vc2r,Medium,6.9,CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:L/VI:L/VA:N/SC:N/SI:N/SA:N,1.26.4,Upgrade to version 1.26.4 or later.,scanned
+urllib3,2.0.7,PyPI,GHSA-8988-9cw3-xx77,High,7.6,CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:P/VC:H/VI:H/VA:N/SC:N/SI:N/SA:N,2.8.0,Upgrade as soon as possible to version 2.8.0 or later.,scanned
+urllib3,2.0.7,PyPI,GHSA-g4mx-q9vg-27p4,Medium,5.7,CVSS:4.0/AV:A/AC:L/AT:P/PR:H/UI:N/VC:H/VI:N/VA:N/SC:N/SI:N/SA:N,2.0.7,Upgrade to version 2.0.7 or later.,scanned
+urllib3,2.0.7,PyPI,GHSA-gh4c-6fx4-qh6g,Medium,6.9,CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:L/SC:N/SI:N/SA:N,2.8.0,Upgrade to version 2.8.0 or later.,scanned
+urllib3,2.0.7,PyPI,GHSA-gm62-xv2j-4w53,High,8.9,CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:N/VI:N/VA:H/SC:N/SI:N/SA:H,2.6.0,Upgrade as soon as possible to version 2.6.0 or later.,scanned
+urllib3,2.0.7,PyPI,GHSA-gwvm-45gx-3cf8,Medium,5.3,CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:P/VC:N/VI:N/VA:N/SC:L/SI:L/SA:N,1.24.2,Upgrade to version 1.24.2 or later.,scanned
+urllib3,2.0.7,PyPI,GHSA-hmv2-79q8-fv6g,High,8.7,CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:H/SC:N/SI:N/SA:N,1.25.8,Upgrade as soon as possible to version 1.25.8 or later.,scanned
+urllib3,2.0.7,PyPI,GHSA-mf9v-mfxr-j63j,High,8.9,CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:N/VI:N/VA:H/SC:N/SI:N/SA:H,2.7.0,Upgrade as soon as possible to version 2.7.0 or later.,scanned
+urllib3,2.0.7,PyPI,GHSA-mh33-7rrq-662w,High,8.7,CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:H/VA:N/SC:N/SI:N/SA:N,1.24.2,Upgrade as soon as possible to version 1.24.2 or later.,scanned
+urllib3,2.0.7,PyPI,GHSA-pq67-6m6q-mj2v,Medium,5.3,CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:U/C:H/I:N/A:N,2.5.0,Upgrade to version 2.5.0 or later.,scanned
+urllib3,2.0.7,PyPI,GHSA-q2q7-5pp4-w6pg,High,8.7,CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:H/SC:N/SI:N/SA:N,1.26.5,Upgrade as soon as possible to version 1.26.5 or later.,scanned
+urllib3,2.0.7,PyPI,GHSA-qccp-gfcp-xxvc,High,8.2,CVSS:4.0/AV:N/AC:H/AT:P/PR:N/UI:N/VC:H/VI:N/VA:N/SC:N/SI:N/SA:N,2.7.0,Upgrade as soon as possible to version 2.7.0 or later.,scanned
+urllib3,2.0.7,PyPI,GHSA-r64q-w8jr-g9qp,Medium,5.3,CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:P/VC:N/VI:N/VA:N/SC:L/SI:L/SA:N,1.24.3,Upgrade to version 1.24.3 or later.,scanned
+urllib3,2.0.7,PyPI,GHSA-v4w5-p2hg-8fh6,Medium,6.3,CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:L/VI:N/VA:N/SC:N/SI:N/SA:N,1.18.1,Upgrade to version 1.18.1 or later.,scanned
+urllib3,2.0.7,PyPI,GHSA-v845-jxx5-vc9f,High,7.4,CVSS:4.0/AV:N/AC:L/AT:P/PR:H/UI:N/VC:H/VI:H/VA:N/SC:N/SI:N/SA:N,2.0.6,Upgrade as soon as possible to version 2.0.6 or later.,scanned
+urllib3,2.0.7,PyPI,GHSA-vxq7-64xx-v4gw,High,8.9,CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:N/VI:N/VA:H/SC:N/SI:N/SA:H,2.8.0,Upgrade as soon as possible to version 2.8.0 or later.,scanned
+urllib3,2.0.7,PyPI,GHSA-wqvq-5m8c-6g24,Medium,6.9,CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:L/VI:L/VA:N/SC:N/SI:N/SA:N,1.25.9,Upgrade to version 1.25.9 or later.,scanned
+urllib3,2.0.7,PyPI,GHSA-www2-v7xj-xrc6,Critical,9.3,CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N,1.23,Immediately upgrade to version 1.23 or later.,scanned
+urllib3,2.0.7,PyPI,PYSEC-2017-98,Unknown,—,—,1.18.1,Upgrade to version 1.18.1 or later.,scanned
+urllib3,2.0.7,PyPI,PYSEC-2018-32,Unknown,—,—,1.23,Upgrade to version 1.23 or later.,scanned
+urllib3,2.0.7,PyPI,PYSEC-2019-132,Unknown,—,—,1.24.3,Upgrade to version 1.24.3 or later.,scanned
+urllib3,2.0.7,PyPI,PYSEC-2019-133,Unknown,—,—,1.24.2,Upgrade to version 1.24.2 or later.,scanned
+urllib3,2.0.7,PyPI,PYSEC-2020-148,Unknown,—,—,1.25.9,Upgrade to version 1.25.9 or later.,scanned
+urllib3,2.0.7,PyPI,PYSEC-2020-149,Unknown,—,—,1.25.8,Upgrade to version 1.25.8 or later.,scanned
+urllib3,2.0.7,PyPI,PYSEC-2021-108,Unknown,—,—,1.26.5,Upgrade to version 1.26.5 or later.,scanned
+urllib3,2.0.7,PyPI,PYSEC-2021-59,Unknown,—,—,1.26.4,Upgrade to version 1.26.4 or later.,scanned
+urllib3,2.0.7,PyPI,PYSEC-2023-192,High,8.1,CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:N,2.0.6,Upgrade as soon as possible to version 2.0.6 or later.,scanned
+urllib3,2.0.7,PyPI,PYSEC-2023-207,Medium,6.1,CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N,1.24.2,Upgrade to version 1.24.2 or later.,scanned
+urllib3,2.0.7,PyPI,PYSEC-2023-212,Medium,4.2,CVSS:3.1/AV:A/AC:H/PR:H/UI:N/S:U/C:H/I:N/A:N,2.0.7,Upgrade to version 2.0.7 or later.,scanned
+urllib3,2.0.7,PyPI,PYSEC-2026-141,Medium,5.3,CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N,2.7.0,Upgrade to version 2.7.0 or later.,scanned
+urllib3,2.0.7,PyPI,PYSEC-2026-142,High,7.5,CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H,2.7.0,Upgrade as soon as possible to version 2.7.0 or later.,scanned
+urllib3,2.0.7,PyPI,PYSEC-2026-1994,High,8.9,CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:N/VI:N/VA:H/SC:N/SI:N/SA:H,2.6.0,Upgrade as soon as possible to version 2.6.0 or later.,scanned
+urllib3,2.0.7,PyPI,PYSEC-2026-1995,Medium,4.4,CVSS:3.1/AV:N/AC:H/PR:H/UI:N/S:U/C:H/I:N/A:N,1.26.19,Upgrade to version 1.26.19 or later.,scanned
+urllib3,2.0.7,PyPI,PYSEC-2026-1996,High,8.9,CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:N/VI:N/VA:H/SC:N/SI:N/SA:H,2.6.3,Upgrade as soon as possible to version 2.6.3 or later.,scanned
+urllib3,2.0.7,PyPI,PYSEC-2026-1997,Medium,5.3,CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:U/C:H/I:N/A:N,2.5.0,Upgrade to version 2.5.0 or later.,scanned
+urllib3,2.0.7,PyPI,PYSEC-2026-1998,High,8.9,CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:N/VI:N/VA:H/SC:N/SI:N/SA:H,2.6.0,Upgrade as soon as possible to version 2.6.0 or later.,scanned
+urllib3,2.0.7,PyPI,PYSEC-2026-1999,Medium,5.3,CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:U/C:H/I:N/A:N,2.5.0,Upgrade to version 2.5.0 or later.,scanned
+urllib3,2.0.7,PyPI,PYSEC-2026-4175,High,7.6,CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:P/VC:H/VI:H/VA:N/SC:N/SI:N/SA:N,2.8.0,Upgrade as soon as possible to version 2.8.0 or later.,scanned
+urllib3,2.0.7,PyPI,PYSEC-2026-4176,Medium,6.9,CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:L/SC:N/SI:N/SA:N,2.8.0,Upgrade to version 2.8.0 or later.,scanned
+urllib3,2.0.7,PyPI,PYSEC-2026-4177,High,8.9,CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:N/VI:N/VA:H/SC:N/SI:N/SA:H,2.8.0,Upgrade as soon as possible to version 2.8.0 or later.,scanned
