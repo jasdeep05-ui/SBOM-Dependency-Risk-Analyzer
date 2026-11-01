@@ -132,13 +132,13 @@ class TestIndex:
         r = client.get("/")
         assert r.status_code == 200
 
-    def test_returns_json(self, client):
+    def test_returns_html(self, client):
         r = client.get("/")
-        assert r.content_type.startswith("application/json")
+        assert r.content_type.startswith("text/html")
 
-    def test_contains_application_key(self, client):
-        data = r = client.get("/")
-        assert "application" in r.get_json()
+    def test_contains_dashboard_content(self, client):
+        r = client.get("/")
+        assert b"SBOM" in r.data or b"sbom" in r.data.lower()
 
 
 # ===========================================================================
@@ -417,3 +417,98 @@ class TestErrorHandling:
         assert r.status_code == 201
         data = r.get_json()
         assert data["insufficient_coverage"] is True
+
+
+# ===========================================================================
+# GET /api/scan/<scan_id>/export/pdf
+# GET /api/scan/<scan_id>/export/csv
+# ===========================================================================
+
+class TestExportRoutes:
+    @rsps_lib.activate
+    def test_pdf_export_returns_200(self, client):
+        _mock_osv_empty()
+        create_r = _upload(client, "requirements.txt", SIMPLE_REQUIREMENTS)
+        scan_id = create_r.get_json()["scan_id"]
+        r = client.get(f"/api/scan/{scan_id}/export/pdf")
+        assert r.status_code == 200
+
+    @rsps_lib.activate
+    def test_pdf_content_type(self, client):
+        _mock_osv_empty()
+        create_r = _upload(client, "requirements.txt", SIMPLE_REQUIREMENTS)
+        scan_id = create_r.get_json()["scan_id"]
+        r = client.get(f"/api/scan/{scan_id}/export/pdf")
+        assert "pdf" in r.content_type.lower() or len(r.data) > 0
+
+    @rsps_lib.activate
+    def test_pdf_body_non_empty(self, client):
+        _mock_osv_empty()
+        create_r = _upload(client, "requirements.txt", SIMPLE_REQUIREMENTS)
+        scan_id = create_r.get_json()["scan_id"]
+        r = client.get(f"/api/scan/{scan_id}/export/pdf")
+        assert len(r.data) > 0
+
+    def test_pdf_unknown_scan_returns_404(self, client):
+        r = client.get("/api/scan/99999/export/pdf")
+        assert r.status_code == 404
+        assert "error" in r.get_json()
+
+    @rsps_lib.activate
+    def test_csv_export_returns_200(self, client):
+        _mock_osv_empty()
+        create_r = _upload(client, "requirements.txt", SIMPLE_REQUIREMENTS)
+        scan_id = create_r.get_json()["scan_id"]
+        r = client.get(f"/api/scan/{scan_id}/export/csv")
+        assert r.status_code == 200
+
+    @rsps_lib.activate
+    def test_csv_content_type(self, client):
+        _mock_osv_empty()
+        create_r = _upload(client, "requirements.txt", SIMPLE_REQUIREMENTS)
+        scan_id = create_r.get_json()["scan_id"]
+        r = client.get(f"/api/scan/{scan_id}/export/csv")
+        assert "csv" in r.content_type.lower() or "text" in r.content_type.lower()
+
+    @rsps_lib.activate
+    def test_csv_has_header_row(self, client):
+        _mock_osv_empty()
+        create_r = _upload(client, "requirements.txt", SIMPLE_REQUIREMENTS)
+        scan_id = create_r.get_json()["scan_id"]
+        r = client.get(f"/api/scan/{scan_id}/export/csv")
+        text = r.data.decode("utf-8")
+        assert "Package" in text
+        assert "Severity" in text
+
+    @rsps_lib.activate
+    def test_csv_body_non_empty(self, client):
+        _mock_osv_empty()
+        create_r = _upload(client, "requirements.txt", SIMPLE_REQUIREMENTS)
+        scan_id = create_r.get_json()["scan_id"]
+        r = client.get(f"/api/scan/{scan_id}/export/csv")
+        assert len(r.data) > 0
+
+    def test_csv_unknown_scan_returns_404(self, client):
+        r = client.get("/api/scan/99999/export/csv")
+        assert r.status_code == 404
+        assert "error" in r.get_json()
+
+    @rsps_lib.activate
+    def test_csv_with_vulnerabilities(self, client):
+        """CSV with a vuln-bearing scan contains the vuln ID."""
+        _mock_osv_vuln()
+        create_r = _upload(client, "requirements.txt", "flask==3.0.3\n")
+        scan_id = create_r.get_json()["scan_id"]
+        r = client.get(f"/api/scan/{scan_id}/export/csv")
+        text = r.data.decode("utf-8")
+        assert "GHSA-route-test-0001" in text
+
+    @rsps_lib.activate
+    def test_pdf_with_vulnerabilities(self, client):
+        """PDF for a vuln-bearing scan is generated without error."""
+        _mock_osv_vuln()
+        create_r = _upload(client, "requirements.txt", "flask==3.0.3\n")
+        scan_id = create_r.get_json()["scan_id"]
+        r = client.get(f"/api/scan/{scan_id}/export/pdf")
+        assert r.status_code == 200
+        assert len(r.data) > 1000  # a non-trivial PDF

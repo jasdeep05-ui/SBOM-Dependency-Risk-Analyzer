@@ -47,6 +47,13 @@ from decimal import Decimal, InvalidOperation
 
 import requests
 from cvss import CVSS2, CVSS3, CVSS2Error, CVSS3Error
+try:
+    from cvss import CVSS4, CVSS4Error
+    _CVSS4_AVAILABLE = True
+except ImportError:
+    _CVSS4_AVAILABLE = False
+    CVSS4 = None       # type: ignore[assignment,misc]
+    CVSS4Error = None  # type: ignore[assignment,misc]
 
 logger = logging.getLogger(__name__)
 
@@ -179,6 +186,7 @@ def scan_dependencies(dependencies: list[dict]) -> list[dict]:
                 package_name=name,
                 version=version,
                 version_type=version_type,
+                ecosystem=osv_ecosystem,
             )
             results.append(vuln_dict)
 
@@ -264,6 +272,7 @@ def _parse_vuln_record(
     package_name: str,
     version: str,
     version_type: str,
+    ecosystem: str | None = None,
 ) -> dict:
     """Parse a single OSV vulnerability record into a result dict."""
     vuln_id = vuln_record.get("id", "")
@@ -273,7 +282,7 @@ def _parse_vuln_record(
     modified = vuln_record.get("modified")
 
     severity_label, cvss_score, cvss_vector = _extract_severity(vuln_record)
-    fixed_version = _extract_fixed_version(vuln_record, package_name)
+    fixed_version = _extract_fixed_version(vuln_record, package_name, ecosystem)
     references = _extract_references(vuln_record)
 
     recommendation = _build_recommendation(fixed_version, severity_label)
@@ -309,18 +318,35 @@ def _extract_severity(
     Extract severity label, numeric CVSS base score, and raw vector.
 
     Priority order:
-      1. CVSS_V3 entry in severity[] array
-      2. CVSS_V2 entry in severity[] array
-      3. database_specific.severity string
-      4. → "Unknown"
+      1. CVSS_V4 entry in severity[] array  (supported: cvss >= 3.2)
+      2. CVSS_V3 entry in severity[] array
+      3. CVSS_V2 entry in severity[] array
+      4. database_specific.severity string
+      5. → "Unknown"
 
     Returns (severity_label, cvss_score_float_or_None, cvss_vector_or_None).
     CVSS base score is parsed from the vector string using the `cvss` library —
     never by casting the vector to float.
+
+    Note: CVSS v4 vectors are identified by the "CVSS_V4" type field.
+    They are NOT passed to CVSS3 or CVSS2 parsers — doing so would produce
+    incorrect results. If the `cvss` library does not support v4 at runtime
+    (ImportError), CVSS_V4 entries fall through to the database_specific
+    or Unknown fallback.
     """
     severity_list = vuln_record.get("severity") or []
 
-    # --- CVSS_V3 first ---
+    # --- CVSS_V4 (highest precedence when library supports it) ---
+    if _CVSS4_AVAILABLE:
+        for entry in severity_list:
+            if entry.get("type") == "CVSS_V4":
+                vector = entry.get("score", "")
+                score = _parse_cvss4_score(vector)
+                if score is not None:
+                    label = _cvss_score_to_label(score)
+                    return label, score, vector
+
+    # --- CVSS_V3 ---
     for entry in severity_list:
         if entry.get("type") == "CVSS_V3":
             vector = entry.get("score", "")
@@ -348,6 +374,23 @@ def _extract_severity(
 
     # Nothing found — explicitly Unknown
     return "Unknown", None, None
+
+
+def _parse_cvss4_score(vector: str) -> float | None:
+    """
+    Parse a CVSS v4 vector string and return the base score as float.
+
+    Uses cvss.CVSS4 from the installed `cvss` library (>= 3.2).
+    Returns None if parsing fails or if CVSS4 is unavailable.
+    Never passes a CVSS v4 vector to CVSS3 or CVSS2 parsers.
+    """
+    if not vector or not _CVSS4_AVAILABLE:
+        return None
+    try:
+        score = CVSS4(vector).base_score
+        return float(score)
+    except Exception:  # noqa: BLE001  (CVSS4Error or any parse failure)
+        return None
 
 
 def _parse_cvss3_score(vector: str) -> float | None:
@@ -402,20 +445,46 @@ def _string_severity_to_label(s: str) -> str:
 # Fixed version extraction
 # ---------------------------------------------------------------------------
 
-def _extract_fixed_version(vuln_record: dict, package_name: str) -> str | None:
+def _extract_fixed_version(
+    vuln_record: dict,
+    package_name: str,
+    ecosystem: str | None = None,
+) -> str | None:
     """
     Extract the earliest fixed version for the given package from OSV ranges.
 
-    Searches affected[].ranges[].events for entries with a "fixed" key.
-    Returns the first one found, or None.
+    Searches affected[].ranges[].events for event dicts that contain the
+    key "fixed". Returns the first match, or None.
+
+    Matching rules:
+    - Package name is compared case-insensitively.
+    - If `ecosystem` is supplied, the affected entry's ecosystem is also
+      matched case-insensitively. This avoids extracting a fix version
+      intended for a different ecosystem that happens to share a package name.
+    - Only `ranges[].events[].fixed` is used — `affected[].versions` lists
+      affected (vulnerable) versions, not fixed versions, and is never read.
+    - All ECOSYSTEM and SEMVER range types are searched; GIT ranges are skipped
+      (their "fixed" value is a commit hash, not a version string).
     """
     affected_list = vuln_record.get("affected") or []
     for affected_entry in affected_list:
         pkg = affected_entry.get("package") or {}
-        # Only look at ranges for the matched package
+
+        # Name must match (case-insensitive)
         if pkg.get("name", "").lower() != package_name.lower():
             continue
+
+        # Ecosystem must match when provided
+        if ecosystem:
+            entry_ecosystem = pkg.get("ecosystem", "")
+            if entry_ecosystem.lower() != ecosystem.lower():
+                continue
+
         for range_entry in (affected_entry.get("ranges") or []):
+            range_type = range_entry.get("type", "")
+            # GIT ranges use commit hashes as "fixed" — not useful as version strings
+            if range_type == "GIT":
+                continue
             for event in (range_entry.get("events") or []):
                 fixed = event.get("fixed")
                 if fixed:

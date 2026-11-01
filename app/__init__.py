@@ -24,7 +24,12 @@ def create_app(config_object="config"):
     Returns:
         Configured Flask app instance.
     """
-    app = Flask(__name__, instance_relative_config=False)
+    app = Flask(
+        __name__,
+        instance_relative_config=False,
+        template_folder=os.path.join(os.path.dirname(__file__), "..", "templates"),
+        static_folder=os.path.join(os.path.dirname(__file__), "..", "static"),
+    )
     app.config.from_object(config_object)
 
     # Ensure required directories exist

@@ -518,3 +518,265 @@ class TestBuildRecommendation:
     def test_no_fixed_version(self):
         r = _build_recommendation(None, "High")
         assert "No fixed version" in r or "no fixed" in r.lower()
+
+
+# ===========================================================================
+# CVSS v4 support (targeted improvement)
+# ===========================================================================
+
+class TestCvss4Support:
+    """Verify CVSS v4 parsing and severity extraction."""
+
+    def test_cvss4_available(self):
+        from app.scanner import _CVSS4_AVAILABLE
+        assert _CVSS4_AVAILABLE is True, (
+            "cvss library >= 3.2 is installed; CVSS4 should be importable"
+        )
+
+    def test_parse_cvss4_score_medium(self):
+        from app.scanner import _parse_cvss4_score
+        # GHSA-652x-xj99-gmcc vector — base score 6.9 (Medium)
+        vector = "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:L/VI:N/VA:N/SC:N/SI:N/SA:N"
+        score = _parse_cvss4_score(vector)
+        assert score is not None
+        assert isinstance(score, float)
+        assert score == pytest.approx(6.9, abs=0.05)
+
+    def test_parse_cvss4_score_returns_float_not_decimal(self):
+        from app.scanner import _parse_cvss4_score
+        vector = "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:L/VI:N/VA:N/SC:N/SI:N/SA:N"
+        score = _parse_cvss4_score(vector)
+        from decimal import Decimal
+        assert not isinstance(score, Decimal)
+        assert isinstance(score, float)
+
+    def test_parse_cvss4_invalid_returns_none(self):
+        from app.scanner import _parse_cvss4_score
+        assert _parse_cvss4_score("not-a-v4-vector") is None
+
+    def test_parse_cvss4_empty_returns_none(self):
+        from app.scanner import _parse_cvss4_score
+        assert _parse_cvss4_score("") is None
+
+    def test_extract_severity_cvss4_entry(self):
+        """CVSS_V4 type in severity array is parsed correctly."""
+        record = {
+            "severity": [
+                {
+                    "type": "CVSS_V4",
+                    "score": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:L/VI:N/VA:N/SC:N/SI:N/SA:N",
+                }
+            ]
+        }
+        label, score, vector = _extract_severity(record)
+        assert label == "Medium"
+        assert score == pytest.approx(6.9, abs=0.05)
+        assert "CVSS:4.0" in vector
+
+    def test_extract_severity_cvss4_preferred_over_cvss3(self):
+        """When both CVSS_V4 and CVSS_V3 are present, CVSS_V4 takes precedence."""
+        record = {
+            "severity": [
+                {
+                    "type": "CVSS_V4",
+                    "score": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:L/VI:N/VA:N/SC:N/SI:N/SA:N",
+                },
+                {
+                    "type": "CVSS_V3",
+                    "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+                },
+            ]
+        }
+        label, score, vector = _extract_severity(record)
+        assert "CVSS:4.0" in vector
+        assert label == "Medium"   # v4 score 6.9, not v3 score 9.8
+
+    def test_extract_severity_cvss4_not_passed_to_cvss3_parser(self):
+        """A CVSS v4 vector must not be handed to the CVSS3 parser."""
+        from app.scanner import _parse_cvss3_score
+        v4_vector = "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:L/VI:N/VA:N/SC:N/SI:N/SA:N"
+        # CVSS3 parser must return None for a v4 vector, not a score
+        result = _parse_cvss3_score(v4_vector)
+        assert result is None
+
+    @rsps_lib.activate
+    def test_scan_with_cvss4_only_vulnerability(self):
+        """Full scan pipeline handles a vuln with only a CVSS_V4 severity entry."""
+        rsps_lib.add(
+            rsps_lib.POST, OSV_URL,
+            json={
+                "vulns": [
+                    {
+                        "id": "GHSA-cvss4-test",
+                        "summary": "Test CVSSv4 only vulnerability",
+                        "details": "Details.",
+                        "published": "2024-01-01T00:00:00Z",
+                        "modified": "2024-01-01T00:00:00Z",
+                        "severity": [
+                            {
+                                "type": "CVSS_V4",
+                                "score": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:L/VI:N/VA:N/SC:N/SI:N/SA:N",
+                            }
+                        ],
+                        "affected": [
+                            {
+                                "package": {"name": "test-pkg", "ecosystem": "PyPI"},
+                                "ranges": [
+                                    {
+                                        "type": "ECOSYSTEM",
+                                        "events": [{"introduced": "0"}, {"fixed": "2.0.0"}],
+                                    }
+                                ],
+                            }
+                        ],
+                        "references": [],
+                    }
+                ]
+            },
+            status=200,
+        )
+        from app.scanner import scan_dependencies as _scan
+        results = _scan([{
+            "name": "test-pkg", "ecosystem": "PyPI",
+            "version": "1.0.0", "version_specifier": "==1.0.0",
+            "is_exact_version": True, "dependency_type": "direct",
+            "parsing_status": "parsed", "skip_reason": None,
+        }])
+        vuln_rows = [r for r in results if r["vuln_id"]]
+        assert len(vuln_rows) == 1
+        assert vuln_rows[0]["severity"] == "Medium"
+        assert vuln_rows[0]["cvss_score"] == pytest.approx(6.9, abs=0.05)
+        assert "CVSS:4.0" in vuln_rows[0]["cvss_vector"]
+
+
+# ===========================================================================
+# Fixed version extraction audit (targeted improvement)
+# ===========================================================================
+
+class TestExtractFixedVersionAudit:
+    """
+    Audits _extract_fixed_version against the live OSV response structure
+    for GHSA-652x-xj99-gmcc (requests 2.31.0) and edge cases.
+    """
+
+    # Exact replica of the GHSA-652x-xj99-gmcc affected structure
+    REQUESTS_RECORD = {
+        "id": "GHSA-652x-xj99-gmcc",
+        "affected": [
+            {
+                "package": {
+                    "name": "requests",
+                    "ecosystem": "PyPI",
+                    "purl": "pkg:pypi/requests",
+                },
+                "ranges": [
+                    {
+                        "type": "ECOSYSTEM",
+                        "events": [
+                            {"introduced": "0"},
+                            {"fixed": "2.3.0"},
+                        ],
+                    }
+                ],
+                "versions": ["0.0.1", "0.10.0", "2.0.0", "2.2.0"],  # AFFECTED versions, not fixed
+            }
+        ],
+    }
+
+    def test_finds_fixed_version_from_ranges(self):
+        fixed = _extract_fixed_version(self.REQUESTS_RECORD, "requests")
+        assert fixed == "2.3.0"
+
+    def test_finds_fixed_version_with_ecosystem_match(self):
+        fixed = _extract_fixed_version(self.REQUESTS_RECORD, "requests", ecosystem="PyPI")
+        assert fixed == "2.3.0"
+
+    def test_ecosystem_mismatch_returns_none(self):
+        """When ecosystem is specified and doesn't match, no fixed version returned."""
+        fixed = _extract_fixed_version(self.REQUESTS_RECORD, "requests", ecosystem="npm")
+        assert fixed is None
+
+    def test_versions_array_never_treated_as_fixed(self):
+        """affected[].versions lists AFFECTED versions — none of them are the fixed version."""
+        fixed = _extract_fixed_version(self.REQUESTS_RECORD, "requests")
+        # The versions array contains "0.0.1", "0.10.0", "2.0.0", "2.2.0"
+        # The fixed version is "2.3.0" — from ranges, not from versions[]
+        assert fixed not in ["0.0.1", "0.10.0", "2.0.0", "2.2.0"]
+        assert fixed == "2.3.0"
+
+    def test_git_range_type_skipped(self):
+        """GIT range type contains commit hashes — should be skipped."""
+        record = {
+            "affected": [
+                {
+                    "package": {"name": "mypkg", "ecosystem": "PyPI"},
+                    "ranges": [
+                        {
+                            "type": "GIT",
+                            "events": [
+                                {"introduced": "abc123def456"},
+                                {"fixed": "deadbeef1234"},
+                            ],
+                        },
+                        {
+                            "type": "ECOSYSTEM",
+                            "events": [
+                                {"introduced": "0"},
+                                {"fixed": "1.5.0"},
+                            ],
+                        },
+                    ],
+                }
+            ]
+        }
+        fixed = _extract_fixed_version(record, "mypkg")
+        # GIT range skipped; ECOSYSTEM range used
+        assert fixed == "1.5.0"
+        assert len(fixed) < 20  # not a commit hash
+
+    def test_multiple_affected_entries_first_matching_wins(self):
+        record = {
+            "affected": [
+                {
+                    "package": {"name": "other-pkg", "ecosystem": "PyPI"},
+                    "ranges": [{"type": "ECOSYSTEM", "events": [{"introduced": "0"}, {"fixed": "9.9.9"}]}],
+                },
+                {
+                    "package": {"name": "mypkg", "ecosystem": "PyPI"},
+                    "ranges": [{"type": "ECOSYSTEM", "events": [{"introduced": "0"}, {"fixed": "2.0.1"}]}],
+                },
+            ]
+        }
+        fixed = _extract_fixed_version(record, "mypkg")
+        assert fixed == "2.0.1"
+
+    def test_no_fixed_event_returns_none(self):
+        record = {
+            "affected": [
+                {
+                    "package": {"name": "mypkg", "ecosystem": "PyPI"},
+                    "ranges": [
+                        {"type": "ECOSYSTEM", "events": [{"introduced": "0"}]}
+                    ],
+                }
+            ]
+        }
+        assert _extract_fixed_version(record, "mypkg") is None
+
+    def test_empty_affected_returns_none(self):
+        assert _extract_fixed_version({"affected": []}, "mypkg") is None
+
+    def test_missing_affected_key_returns_none(self):
+        assert _extract_fixed_version({}, "mypkg") is None
+
+    def test_case_insensitive_name_match(self):
+        record = {
+            "affected": [
+                {
+                    "package": {"name": "Requests", "ecosystem": "PyPI"},
+                    "ranges": [{"type": "ECOSYSTEM", "events": [{"introduced": "0"}, {"fixed": "2.3.0"}]}],
+                }
+            ]
+        }
+        # Query with lowercase name, record has titlecase name
+        assert _extract_fixed_version(record, "requests") == "2.3.0"

@@ -1,0 +1,2 @@
+Package,Version,Ecosystem,Vuln ID,Severity,CVSS Score,CVSS Vector,Fixed Version,Recommendation,Scan Status
+flask,3.0.3,PyPI,GHSA-route-test-0001,Critical,9.8,CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H,3.1.0,Immediately upgrade to version 3.1.0 or later.,scanned

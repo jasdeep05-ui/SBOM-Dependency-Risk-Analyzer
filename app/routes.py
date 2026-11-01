@@ -1,15 +1,17 @@
 """
-Flask routes — main Blueprint (Phase 6 full implementation).
+Flask routes — main Blueprint (Phase 6 + 8 full implementation).
 
 Endpoints
 ---------
-GET  /                         Landing page (returns JSON info for now; UI in Phase 7)
-GET  /health                   Liveness check
-POST /api/scan                 Upload + scan a requirements.txt or package.json
-GET  /api/scan/<scan_id>       Full scan result with vulnerabilities
-GET  /api/scans                List all scan summaries
-GET  /api/scan/<scan_id>/sbom  Raw CycloneDX SBOM JSON for a scan
-DELETE /api/scan/<scan_id>     Delete a scan and all its vulnerability records
+GET  /                              Landing page (dashboard HTML)
+GET  /health                        Liveness check
+POST /api/scan                      Upload + scan a requirements.txt or package.json
+GET  /api/scan/<scan_id>            Full scan result with vulnerabilities
+GET  /api/scans                     List all scan summaries
+GET  /api/scan/<scan_id>/sbom       Raw CycloneDX SBOM JSON for a scan
+DELETE /api/scan/<scan_id>          Delete a scan and all its vulnerability records
+GET  /api/scan/<scan_id>/export/pdf Download PDF report
+GET  /api/scan/<scan_id>/export/csv Download CSV report
 
 Security
 --------
@@ -27,7 +29,7 @@ import traceback
 from datetime import datetime, timezone
 from werkzeug.utils import secure_filename
 
-from flask import Blueprint, current_app, jsonify, request
+from flask import Blueprint, current_app, jsonify, request, render_template, send_file
 
 from app import db
 from app.models import Scan, Vulnerability
@@ -35,6 +37,7 @@ from app.parser import parse_file
 from app.sbom_generator import generate_sbom
 from app.scanner import scan_dependencies, STATUS_SCANNED, STATUS_SCAN_ERROR
 from app.risk_scorer import calculate_risk_score
+from app.report_generator import generate_pdf, generate_csv
 
 logger = logging.getLogger(__name__)
 
@@ -92,23 +95,8 @@ def method_not_allowed(e):
 
 @main.route("/")
 def index():
-    """Landing route — returns application info as JSON (UI delivered in Phase 7)."""
-    return jsonify({
-        "application": "SBOM & Dependency Risk Analyzer",
-        "version": "1.0.0",
-        "description": (
-            "Upload a requirements.txt or package.json to scan "
-            "dependencies for known vulnerabilities."
-        ),
-        "endpoints": {
-            "POST /api/scan":                    "Upload and scan a dependency file",
-            "GET  /api/scan/<id>":               "Retrieve scan results",
-            "GET  /api/scans":                   "List all scans",
-            "GET  /api/scan/<id>/sbom":          "Retrieve CycloneDX SBOM",
-            "DELETE /api/scan/<id>":             "Delete a scan",
-            "GET  /health":                      "Health check",
-        },
-    })
+    """Serve the dashboard HTML (Phase 7)."""
+    return render_template("index.html")
 
 
 @main.route("/health")
@@ -258,6 +246,50 @@ def api_delete_scan(scan_id: int):
         logger.error("Failed to delete scan %d: %s", scan_id, exc)
         return _json_error("Failed to delete scan.", 500)
     return jsonify({"message": f"Scan {scan_id} deleted successfully."}), 200
+
+
+@main.route("/api/scan/<int:scan_id>/export/pdf", methods=["GET"])
+def api_export_pdf(scan_id: int):
+    """Generate and download a PDF report for a scan."""
+    scan = db.session.get(Scan, scan_id)
+    if scan is None:
+        return _json_error(f"Scan {scan_id} not found.", 404)
+
+    export_folder = current_app.config.get("EXPORT_FOLDER", "exports")
+    try:
+        pdf_path = generate_pdf(scan, scan.vulnerabilities, export_folder)
+    except Exception as exc:  # noqa: BLE001
+        logger.error("PDF generation failed for scan %d: %s", scan_id, exc)
+        return _json_error("Failed to generate PDF report.", 500)
+
+    return send_file(
+        pdf_path,
+        as_attachment=True,
+        download_name=f"scan_{scan_id}_report.pdf",
+        mimetype="application/pdf",
+    )
+
+
+@main.route("/api/scan/<int:scan_id>/export/csv", methods=["GET"])
+def api_export_csv(scan_id: int):
+    """Generate and download a CSV report for a scan."""
+    scan = db.session.get(Scan, scan_id)
+    if scan is None:
+        return _json_error(f"Scan {scan_id} not found.", 404)
+
+    export_folder = current_app.config.get("EXPORT_FOLDER", "exports")
+    try:
+        csv_path = generate_csv(scan, scan.vulnerabilities, export_folder)
+    except Exception as exc:  # noqa: BLE001
+        logger.error("CSV generation failed for scan %d: %s", scan_id, exc)
+        return _json_error("Failed to generate CSV report.", 500)
+
+    return send_file(
+        csv_path,
+        as_attachment=True,
+        download_name=f"scan_{scan_id}_report.csv",
+        mimetype="text/csv",
+    )
 
 
 # ---------------------------------------------------------------------------

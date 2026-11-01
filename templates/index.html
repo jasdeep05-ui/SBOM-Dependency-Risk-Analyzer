@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SBOM Dependency Risk Analyzer</title>
+  <link rel="stylesheet" href="/static/css/dashboard.css" />
+</head>
+<body>
+<div class="app-layout">
+
+  <!-- ======================== SIDEBAR ======================== -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <h1>SBOM Risk Analyzer</h1>
+      <span>IBM Cybersecurity Training</span>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-item active" data-page="scan">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zm1 11H7V7h2v4zm0-6H7V3h2v2z"/></svg>
+        New Scan
+      </div>
+      <div class="nav-item" data-page="results">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 2.5A2.5 2.5 0 0 1 4.5 0h7A2.5 2.5 0 0 1 14 2.5v11a2.5 2.5 0 0 1-2.5 2.5h-7A2.5 2.5 0 0 1 2 13.5v-11zm2.5-.5a.5.5 0 0 0-.5.5v11a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 .5-.5v-11a.5.5 0 0 0-.5-.5h-7zM5 4h6v1H5V4zm0 2h6v1H5V6zm0 2h4v1H5V8z"/></svg>
+        Results
+      </div>
+      <div class="nav-item" data-page="history">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M1.5 1a.5.5 0 0 0-.5.5v3a.5.5 0 0 1-1 0v-3A1.5 1.5 0 0 1 1.5 0h3a.5.5 0 0 1 0 1h-3zM11 .5a.5.5 0 0 1 .5-.5h3A1.5 1.5 0 0 1 16 1.5v3a.5.5 0 0 1-1 0v-3a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 1-.5-.5zM.5 11a.5.5 0 0 1 .5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 1 0 1h-3A1.5 1.5 0 0 1 0 14.5v-3a.5.5 0 0 1 .5-.5zm15 0a.5.5 0 0 1 .5.5v3a1.5 1.5 0 0 1-1.5 1.5h-3a.5.5 0 0 1 0-1h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 1 .5-.5z"/></svg>
+        Scan History
+      </div>
+    </nav>
+  </aside>
+
+  <!-- ======================== MAIN ======================== -->
+  <main class="main-content">
+
+    <!-- ---- Page: New Scan ---- -->
+    <section id="page-scan" class="page active">
+      <div class="page-header">
+        <h2>Scan Dependencies</h2>
+        <p>Upload a <strong>requirements.txt</strong> or <strong>package.json</strong> file to detect known vulnerabilities.</p>
+      </div>
+
+      <div class="card">
+        <div id="scan-alert" class="alert"></div>
+
+        <div id="upload-zone" class="upload-zone">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+          </svg>
+          <p><strong>Drop your file here</strong> or click to browse</p>
+          <p class="file-types">Supported: requirements.txt &amp; package.json · Max 2 MB</p>
+        </div>
+        <input type="file" id="file-input" accept=".txt,.json" style="display:none" />
+
+        <div id="selected-file" class="selected-file">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0zM9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1zM5 6h6v1H5V6zm0 2h6v1H5V8zm0 2h3v1H5v-1z"/></svg>
+          <span class="file-name" id="selected-file-name"></span>
+          <span class="remove-file" id="remove-file" title="Remove file">&#x2715;</span>
+        </div>
+
+        <div style="margin-top:16px; display:flex; gap:10px; align-items:center">
+          <button id="scan-btn" class="btn btn-primary" disabled>Scan Dependencies</button>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:16px">
+        <div class="card-title">How it works</div>
+        <ol style="padding-left:18px; color:var(--text-muted); font-size:13px; line-height:2">
+          <li>Upload your dependency file</li>
+          <li>Dependencies are parsed and a CycloneDX SBOM is generated</li>
+          <li>Each pinned dependency is checked against the OSV vulnerability database</li>
+          <li>Results are classified by severity and a risk score is calculated</li>
+          <li>Download a PDF or CSV report of the findings</li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ---- Page: Results ---- -->
+    <section id="page-results" class="page">
+      <div class="page-header" style="display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:12px">
+        <div>
+          <h2 id="result-filename">Scan Results</h2>
+          <p id="result-ecosystem" style="color:var(--text-muted); font-size:12px"></p>
+          <p style="color:var(--text-muted); font-size:11px">
+            <span id="result-date"></span> &nbsp;·&nbsp; Scan <span id="result-scan-id"></span>
+          </p>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center">
+          <button id="btn-export-csv" class="btn btn-secondary btn-sm">⬇ CSV</button>
+          <button id="btn-export-pdf" class="btn btn-secondary btn-sm">⬇ PDF</button>
+          <button id="btn-view-sbom"  class="btn btn-secondary btn-sm">SBOM JSON</button>
+          <button id="btn-delete-scan" class="btn btn-danger btn-sm">Delete</button>
+        </div>
+      </div>
+
+      <!-- Coverage warning -->
+      <div id="coverage-warning" class="coverage-warning" style="display:none">
+        ⚠ Insufficient coverage — no dependencies were successfully scanned. Results may not reflect actual risk.
+      </div>
+
+      <!-- Risk score + counts -->
+      <div style="display:grid; grid-template-columns: auto 1fr; gap:16px; margin-bottom:16px; align-items:start">
+        <div class="card" style="margin:0; display:flex; align-items:center; gap:20px; padding:20px 24px">
+          <div id="risk-badge" class="risk-badge risk-a">
+            <span class="score">0</span>
+            <span class="grade">A</span>
+          </div>
+          <div class="risk-info">
+            <h3 id="risk-category">—</h3>
+            <div class="category" id="risk-score-label">Custom Project Risk Score (not CVSS)</div>
+          </div>
+        </div>
+        <div class="stats-grid" style="margin:0">
+          <div class="stat-card stat-critical"><div class="stat-value" id="stat-critical">0</div><div class="stat-label">Critical</div></div>
+          <div class="stat-card stat-high">   <div class="stat-value" id="stat-high">0</div>    <div class="stat-label">High</div></div>
+          <div class="stat-card stat-medium"> <div class="stat-value" id="stat-medium">0</div>  <div class="stat-label">Medium</div></div>
+          <div class="stat-card stat-low">    <div class="stat-value" id="stat-low">0</div>     <div class="stat-label">Low</div></div>
+          <div class="stat-card stat-unknown"><div class="stat-value" id="stat-unknown">0</div> <div class="stat-label">Unknown</div></div>
+          <div class="stat-card stat-total">  <div class="stat-value" id="stat-total-vulns">0</div><div class="stat-label">Total Vulns</div></div>
+        </div>
+      </div>
+
+      <!-- Coverage summary -->
+      <div class="card" style="padding:12px 16px">
+        <div class="coverage-row">
+          <div class="coverage-item"><div class="coverage-dot" style="background:var(--text-link)"></div> <strong id="stat-total-deps">0</strong>&nbsp;total deps</div>
+          <div class="coverage-item"><div class="coverage-dot" style="background:var(--sev-low)"></div>   <strong id="stat-scanned">0</strong>&nbsp;scanned</div>
+          <div class="coverage-item"><div class="coverage-dot" style="background:var(--sev-medium)"></div><strong id="stat-skipped">0</strong>&nbsp;skipped (range/unpinned)</div>
+          <div class="coverage-item"><div class="coverage-dot" style="background:var(--sev-critical)"></div><strong id="stat-errors">0</strong>&nbsp;scan errors</div>
+        </div>
+      </div>
+
+      <!-- Vulnerability table -->
+      <div class="card" style="padding:0; overflow:hidden">
+        <div style="padding:14px 16px; border-bottom:1px solid var(--border); font-weight:600; font-size:13px">
+          Vulnerability Details
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Package</th>
+                <th>Version</th>
+                <th>Vuln ID</th>
+                <th>Severity</th>
+                <th>CVSS</th>
+                <th>Fixed Version</th>
+                <th>Recommendation</th>
+              </tr>
+            </thead>
+            <tbody id="vuln-tbody">
+              <tr><td colspan="7" class="empty-state"><p>No results loaded.</p></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---- Page: Scan History ---- -->
+    <section id="page-history" class="page">
+      <div class="page-header">
+        <h2>Scan History</h2>
+        <p>Click any scan to view its full results.</p>
+      </div>
+      <div id="history-alert" class="alert"></div>
+      <div id="history-list">
+        <div style="color:var(--text-muted); font-size:13px">Loading…</div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script src="/static/js/dashboard.js"></script>
+</body>
+</html>
