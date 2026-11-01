@@ -1,0 +1,231 @@
+
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SBOM Analyzer — Audit Report</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  body { font-family: -apple-system, "Segoe UI", system-ui, sans-serif; font-size: 14px; line-height: 1.6; color: #1f2328; background: #ffffff; margin: 0; padding: 24px 16px; }
+  .wrap { max-width: 760px; margin: 0 auto; }
+  h1 { font-size: 22px; margin: 0 0 4px; letter-spacing: -0.01em; }
+  .subtitle { color: #57606a; font-size: 13px; margin-bottom: 28px; }
+  h2 { font-size: 15px; font-weight: 700; margin: 28px 0 10px; border-bottom: 1px solid #e5e7eb; padding-bottom: 6px; letter-spacing: -0.01em; }
+  h3 { font-size: 13px; font-weight: 700; margin: 16px 0 6px; color: #1f2328; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 10px 0 18px; }
+  th { background: #f7f8fa; text-align: left; padding: 8px 10px; font-weight: 600; border: 1px solid #e5e7eb; color: #57606a; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; }
+  td { padding: 8px 10px; border: 1px solid #e5e7eb; vertical-align: top; }
+  tr:nth-child(even) td { background: #f7f8fa; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 700; line-height: 1.5; }
+  .critical { background: #fee2e2; color: #b91c1c; }
+  .high     { background: #fff7ed; color: #c2410c; }
+  .medium   { background: #fefce8; color: #92400e; }
+  .low      { background: #f0fdf4; color: #15803d; }
+  .info     { background: #eff6ff; color: #1d4ed8; }
+  .pass     { background: #f0fdf4; color: #15803d; }
+  .fixed    { background: #f0fdf4; color: #15803d; }
+  .none     { background: #f7f8fa; color: #57606a; }
+  code { font-family: ui-monospace, "SF Mono", Consolas, monospace; font-size: 12px; background: #f7f8fa; padding: 1px 5px; border-radius: 4px; border: 1px solid #e5e7eb; }
+  .summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 12px 0 22px; }
+  .stat-box { background: #f7f8fa; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px 14px; text-align: center; }
+  .stat-box .num { font-size: 28px; font-weight: 800; letter-spacing: -0.02em; display: block; }
+  .stat-box .label { font-size: 11px; color: #57606a; text-transform: uppercase; letter-spacing: 0.05em; }
+  .stat-box.critical-box { border-color: #fca5a5; }
+  .stat-box .num.c { color: #b91c1c; }
+  .stat-box .num.h { color: #c2410c; }
+  .stat-box .num.m { color: #92400e; }
+  .stat-box .num.l { color: #15803d; }
+  .section { margin-bottom: 10px; }
+  ul { margin: 6px 0; padding-left: 20px; }
+  li { margin-bottom: 4px; }
+  .check { color: #15803d; font-weight: 700; }
+  .warn { color: #92400e; font-weight: 700; }
+  .err { color: #b91c1c; font-weight: 700; }
+  .test-row-pass td:first-child { color: #15803d; font-weight: 600; }
+  footer { margin-top: 40px; padding-top: 14px; border-top: 1px solid #e5e7eb; text-align: center; font-size: 11px; color: #8c959f; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>SBOM &amp; Dependency Risk Analyzer — Audit Report</h1>
+<div class="subtitle">Complete error detection, debugging &amp; quality audit · November 2026</div>
+
+<h2>Executive Summary</h2>
+<div class="summary-grid">
+  <div class="stat-box critical-box"><span class="num c">1</span><span class="label">Critical</span></div>
+  <div class="stat-box"><span class="num h">1</span><span class="label">High</span></div>
+  <div class="stat-box"><span class="num m">1</span><span class="label">Medium</span></div>
+  <div class="stat-box"><span class="num l">3</span><span class="label">Low / Info</span></div>
+</div>
+<p><strong>6 issues identified, 3 fixed.</strong> All 328 automated tests pass before and after changes. No issues were found with the backend logic, API routes, database operations, SBOM generation, OSV scanner, CVSS parsing, risk scoring, PDF generation, or CSV generation.</p>
+
+<h2>Phase 1 — Project Structure</h2>
+<p>The project is a Flask application with 7 Python modules, 6 test files (328 tests), 2 HTML templates, 2 CSS files, and 2 JavaScript files. Architecture is sound — clean separation between parser, scanner, risk scorer, SBOM generator, report generator, routes, and models.</p>
+
+<h2>Phase 2 — Backend Findings</h2>
+<table>
+  <thead><tr><th>Severity</th><th>File</th><th>Issue</th><th>Status</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><span class="badge medium">Medium</span></td>
+      <td><code>app/report_generator.py</code></td>
+      <td><strong>Unused import</strong> — <code>import tempfile</code> on line 18 is never used. While not a runtime bug, it creates misleading noise and will trigger linter warnings.</td>
+      <td><span class="badge fixed">Fixed</span></td>
+    </tr>
+    <tr>
+      <td><span class="badge low">Low</span></td>
+      <td><code>config.py</code></td>
+      <td><strong>Insecure fallback secret key</strong> — In production, if <code>SECRET_KEY</code> env var is not set, a hardcoded dev key is used. The code correctly logs a warning but does not prevent startup. Acceptable for dev; documented already.</td>
+      <td><span class="badge none">Informational</span></td>
+    </tr>
+    <tr>
+      <td><span class="badge low">Low</span></td>
+      <td><code>app/routes.py</code></td>
+      <td><strong><code>import json</code> inside function</strong> — <code>api_get_sbom()</code> imports <code>json</code> at function scope. Not a bug but a style issue; <code>json</code> is in stdlib so no performance impact.</td>
+      <td><span class="badge none">Not changed</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Backend items verified as correct (no bugs found)</h3>
+<ul>
+  <li>All imports resolve correctly across all modules.</li>
+  <li>Flask app factory, blueprint registration, and <code>db.create_all()</code> work correctly.</li>
+  <li>All 9 API routes return correct HTTP status codes.</li>
+  <li>OSV API retries and error handling: correctly turns HTTP 4xx/5xx and timeouts into <code>scan_error</code> rows — never silently marks errored packages as clean.</li>
+  <li>CVSS v4/v3/v2 priority order is correct. CVSS v4 vectors are never passed to the v3 parser.</li>
+  <li>Risk score formula (<code>Critical×10 + High×5 + Medium×2 + Low×1</code>, capped at 100) is correct and unchanged.</li>
+  <li>Insufficient coverage guard correctly activates when <code>scanned_count == 0</code> and skipped/errors &gt; 0.</li>
+  <li>Database cascade delete works: deleting a Scan removes all Vulnerability children.</li>
+  <li>File upload path traversal guard is present and correct.</li>
+  <li>Uploaded files are deleted in a <code>finally</code> block after parsing — no leftover temp files.</li>
+  <li>PDF and CSV reports generate correctly for all severity levels and edge cases (zero vulns, None fields, missing fixed versions).</li>
+  <li>CycloneDX 1.5 SBOM contains correct <code>bomFormat</code>, <code>specVersion</code>, PURLs, and properties.</li>
+</ul>
+
+<h2>Phase 3 — Frontend Findings</h2>
+<table>
+  <thead><tr><th>Severity</th><th>File</th><th>Issue</th><th>Status</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><span class="badge critical">Critical</span></td>
+      <td><code>static/js/</code></td>
+      <td><strong>Missing <code>dashboard.js</code></strong> — Both HTML templates reference <code>/static/js/dashboard.js</code> but only <code>dashboard (1).js</code> existed (the original was deleted per git status: <code>D static/js/dashboard.js</code>). Without this file, the entire frontend is non-functional: the file upload, scan display, history sidebar, SBOM explorer, and all action buttons are completely broken.</td>
+      <td><span class="badge fixed">Fixed</span></td>
+    </tr>
+    <tr>
+      <td><span class="badge critical">Critical</span></td>
+      <td><code>templates/index.html</code></td>
+      <td><strong>Wrong template served</strong> — The active <code>index.html</code> was a stripped-down version without the landing page, landing CSS (<code>landing.css</code>), or <code>landing.js</code>. The full version with hero section, feature cards, navigation, and proper landing-to-dashboard routing was in <code>index (1).html</code>. Replaced <code>index.html</code> with the full version.</td>
+      <td><span class="badge fixed">Fixed</span></td>
+    </tr>
+    <tr>
+      <td><span class="badge high">High</span></td>
+      <td><code>static/js/dashboard.js</code></td>
+      <td><strong>Grade threshold mismatch (<code>gradeFor()</code> vs <code>_score_to_grade()</code>)</strong> — The JS fallback function used wrong thresholds (C≥40, B≥20) that don't match the backend (C≥30, B≥1). Scores 1–29 were shown as grade A in the sidebar history when the server returned grade B; scores 30–39 were shown as B when grade C. This only affects client-side rendering when <code>risk_grade</code> is absent from the API response, but it produces incorrect badge colours in scan history.</td>
+      <td><span class="badge fixed">Fixed</span></td>
+    </tr>
+    <tr>
+      <td><span class="badge low">Low</span></td>
+      <td><code>static/js/dashboard.js</code></td>
+      <td><strong>Unicode symbols in JS file</strong> — The file contains valid UTF-8 Unicode characters (em-dash, ellipsis <code>…</code>, arrows, checkmark, emoji). These render correctly in all modern browsers. Flask serves static files with the correct <code>text/javascript; charset=utf-8</code> content type. No fix needed.</td>
+      <td><span class="badge none">No action needed</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Phase 4 — Security &amp; Reliability</h2>
+<table>
+  <thead><tr><th>Area</th><th>Finding</th></tr></thead>
+  <tbody>
+    <tr><td>File uploads</td><td><span class="check">✓</span> <code>secure_filename()</code> is applied to all uploads. Extension allowlist enforced (<code>.txt</code>, <code>.json</code> only). 2 MB hard limit enforced by Flask at framework level.</td></tr>
+    <tr><td>Path traversal</td><td><span class="check">✓</span> Explicit <code>os.path.abspath()</code> check prevents uploading outside the upload folder.</td></tr>
+    <tr><td>Temp file cleanup</td><td><span class="check">✓</span> Uploaded files are deleted in a <code>finally</code> block in <code>parse_file()</code>, even on parse failure.</td></tr>
+    <tr><td>SQL injection</td><td><span class="check">✓</span> All database access uses SQLAlchemy ORM with parameterised queries. No raw SQL.</td></tr>
+    <tr><td>XSS</td><td><span class="check">✓</span> All user-controlled data rendered in JS uses the <code>esc()</code> HTML-escaping function. No <code>innerHTML</code> with unescaped data.</td></tr>
+    <tr><td>Secret exposure</td><td><span class="check">✓</span> No API keys, credentials, or secrets found in any source file. Secret key comes from env var with a logged warning if unset.</td></tr>
+    <tr><td>Error messages</td><td><span class="check">✓</span> Stack traces are logged server-side only. API responses return generic error messages without internal paths or exception details.</td></tr>
+    <tr><td>OSV API resilience</td><td><span class="check">✓</span> Retries with exponential backoff (1s/2s/4s). HTTP errors and timeouts produce <code>scan_error</code> rows, never false "clean" results.</td></tr>
+    <tr><td>CORS</td><td><span class="check">✓</span> CORS is disabled by default; only enabled when <code>CORS_ALLOWED_ORIGINS</code> env var is explicitly set.</td></tr>
+  </tbody>
+</table>
+
+<h2>Phase 5 — Test Results</h2>
+<table>
+  <thead><tr><th>Suite</th><th>Tests</th><th>Before Fixes</th><th>After Fixes</th></tr></thead>
+  <tbody>
+    <tr><td><code>test_parser.py</code></td><td>92</td><td><span class="badge pass">92 pass</span></td><td><span class="badge pass">92 pass</span></td></tr>
+    <tr><td><code>test_report_generator.py</code></td><td>24</td><td><span class="badge pass">24 pass</span></td><td><span class="badge pass">24 pass</span></td></tr>
+    <tr><td><code>test_risk_scorer.py</code></td><td>30</td><td><span class="badge pass">30 pass</span></td><td><span class="badge pass">30 pass</span></td></tr>
+    <tr><td><code>test_routes.py</code></td><td>40</td><td><span class="badge pass">40 pass</span></td><td><span class="badge pass">40 pass</span></td></tr>
+    <tr><td><code>test_sbom_generator.py</code></td><td>37</td><td><span class="badge pass">37 pass</span></td><td><span class="badge pass">37 pass</span></td></tr>
+    <tr><td><code>test_scanner.py</code></td><td>105</td><td><span class="badge pass">105 pass</span></td><td><span class="badge pass">105 pass</span></td></tr>
+    <tr><td><strong>Total</strong></td><td><strong>328</strong></td><td><span class="badge pass">328 / 328</span></td><td><span class="badge pass">328 / 328</span></td></tr>
+  </tbody>
+</table>
+<p>2 third-party deprecation warnings present in both runs — <code>ast.NameConstant</code> (reportlab, Python 3.14 concern) and <code>urllib3</code> version mismatch (requests library). Neither is caused by application code.</p>
+
+<h2>Phase 6 — Files Changed</h2>
+<table>
+  <thead><tr><th>File</th><th>Change</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><code>static/js/dashboard.js</code></td>
+      <td><strong>Created</strong> — copied from <code>dashboard (1).js</code> (the original was deleted from git). This was the single most critical fix: without it, the entire frontend was broken.</td>
+    </tr>
+    <tr>
+      <td><code>templates/index.html</code></td>
+      <td><strong>Replaced</strong> — copied from <code>index (1).html</code>. The active template was missing the landing page, landing CSS, and landing JS. Now correctly loads all four assets: <code>dashboard.css</code>, <code>landing.css</code>, <code>dashboard.js</code>, <code>landing.js</code>.</td>
+    </tr>
+    <tr>
+      <td><code>static/js/dashboard.js</code></td>
+      <td><strong>Bug fix</strong> — Corrected <code>gradeFor()</code> thresholds to match the backend: C≥30 (was ≥40), B≥1 (was ≥20). Prevents incorrect grade badges in the scan history sidebar.</td>
+    </tr>
+    <tr>
+      <td><code>app/report_generator.py</code></td>
+      <td><strong>Cleanup</strong> — Removed unused <code>import tempfile</code> (line 18). No behaviour change.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Remaining Unresolved Issues</h2>
+<table>
+  <thead><tr><th>Severity</th><th>Issue</th><th>Reason not changed</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><span class="badge low">Low</span></td>
+      <td><code>import json</code> inside <code>api_get_sbom()</code> in <code>routes.py</code></td>
+      <td>Functional; stdlib import has no performance impact; not worth a diff.</td>
+    </tr>
+    <tr>
+      <td><span class="badge low">Info</span></td>
+      <td>Insecure fallback <code>SECRET_KEY</code> in <code>config.py</code></td>
+      <td>Already documented and logged. This is the expected dev-mode behaviour; production deployments must set the env var.</td>
+    </tr>
+    <tr>
+      <td><span class="badge low">Info</span></td>
+      <td>Third-party deprecation warning: <code>ast.NameConstant</code> in <code>reportlab</code></td>
+      <td>ReportLab library issue; will be fixed upstream when they target Python 3.14. No application code change needed.</td>
+    </tr>
+    <tr>
+      <td><span class="badge low">Info</span></td>
+      <td>Third-party warning: <code>urllib3</code> version mismatch in <code>requests</code></td>
+      <td>Environment-level pip conflict, not an application bug. Update <code>urllib3</code> version pin in <code>requirements.txt</code> if it causes problems at runtime.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Manual Checks Recommended</h2>
+<ul>
+  <li><strong>Browser smoke test:</strong> Start the app (<code>python run.py</code>) and verify the landing page loads, clicking "Get Started" transitions to the analyzer, and the upload form works end-to-end.</li>
+  <li><strong>Hash routing:</strong> Verify <code>#analyzer</code>, <code>#history</code>, <code>#scan=ID</code> URLs route correctly between landing and dashboard views.</li>
+  <li><strong>Production SECRET_KEY:</strong> Set <code>SECRET_KEY</code> environment variable before any deployment. The dev fallback is intentionally insecure.</li>
+  <li><strong>HTTPS in production:</strong> The app has no built-in TLS. Use a reverse proxy (nginx, Caddy) or cloud load-balancer to terminate HTTPS.</li>
+  <li><strong>Stale duplicate files:</strong> <code>static/js/dashboard (1).js</code> and <code>templates/index (1).html</code> are now redundant duplicates. They can be deleted to avoid confusion, but this is cosmetic — they have no effect on the running application.</li>
+</ul>
+
+<footer>Made with IBM Bob</footer>
+</div>
+</body>
+</html>

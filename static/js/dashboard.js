@@ -36,7 +36,7 @@
     return "Unknown";
   }
   function gradeFor(score) {
-    return score >= 80 ? "F" : score >= 60 ? "D" : score >= 40 ? "C" : score >= 20 ? "B" : "A";
+    return score >= 80 ? "F" : score >= 60 ? "D" : score >= 30 ? "C" : score >= 1 ? "B" : "A";
   }
   function fmtDate(s) {
     if (!s) return "";
@@ -153,7 +153,7 @@
   }, null, 2);
   $("sampleReqBtn").onclick = function () { submit(new File([SAMPLE_REQ], "requirements.txt", { type: "text/plain" })); };
   $("samplePkgBtn").onclick = function () { submit(new File([SAMPLE_PKG], "package.json", { type: "application/json" })); };
-  $("newScanBtn").onclick = function () { state.scanId = null; location.hash = ""; markActive(); show("viewUpload"); };
+  $("newScanBtn").onclick = function () { state.scanId = null; location.hash = "analyzer"; markActive(); show("viewUpload"); };
 
   /* ------------------------------------------------------------------ *
    * History
@@ -511,7 +511,7 @@
   $("dlgOk").onclick = function () {
     dlg.close();
     api("/api/scan/" + encodeURIComponent(state.scanId), { method: "DELETE" }).then(function () {
-      toast("Scan deleted", "ok"); state.scanId = null; location.hash = ""; show("viewUpload"); loadHistory();
+      toast("Scan deleted", "ok"); state.scanId = null; location.hash = "analyzer"; show("viewUpload"); loadHistory();
     }).catch(function (e) { toast(e.message, "error"); });
   };
 

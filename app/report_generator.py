@@ -14,7 +14,6 @@ generate_csv(scan, vulnerabilities, export_folder) -> str
 
 import csv
 import os
-import tempfile
 from datetime import timezone
 
 from reportlab.lib import colors
